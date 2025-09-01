@@ -1,6 +1,9 @@
 import logging
 from django.utils import timezone
-from .models import RequestLog
+from django.http import HttpResponseForbidden
+from django.core.cache import cache
+from .models import RequestLog, BlockedIP
+from .geolocation import geolocation_service
 
 
 # Configure logging
@@ -38,6 +41,11 @@ class IPTrackingMiddleware:
         # Get client IP address
         ip_address = self.get_client_ip(request)
         
+        # Check if IP is blocked
+        if self.is_ip_blocked(ip_address):
+            logger.warning(f"Blocked request from {ip_address} to {request.get_full_path()}")
+            return HttpResponseForbidden("Access denied: Your IP address has been blocked.")
+        
         # Get request path
         path = request.get_full_path()
         
@@ -46,12 +54,20 @@ class IPTrackingMiddleware:
         
         # Log the request details
         try:
+            # Get geolocation data
+            location_data = geolocation_service.get_location_data(ip_address)
+            
             RequestLog.objects.create(
                 ip_address=ip_address,
                 timestamp=timestamp,
-                path=path
+                path=path,
+                country=location_data['country'],
+                city=location_data['city'],
+                region=location_data['region'],
+                latitude=location_data['latitude'],
+                longitude=location_data['longitude']
             )
-            logger.info(f"Logged request: {ip_address} - {path} at {timestamp}")
+            logger.info(f"Logged request: {ip_address} ({location_data['city']}, {location_data['country']}) - {path} at {timestamp}")
         except Exception as e:
             # Log error but don't break the request processing
             logger.error(f"Failed to log request: {e}")
@@ -60,6 +76,33 @@ class IPTrackingMiddleware:
         response = self.get_response(request)
         
         return response
+    
+    def is_ip_blocked(self, ip_address):
+        """
+        Check if an IP address is blocked.
+        
+        Uses caching to avoid database hits on every request.
+        
+        Args:
+            ip_address: The IP address to check
+            
+        Returns:
+            bool: True if the IP is blocked, False otherwise
+        """
+        cache_key = f"blocked_ip_{ip_address}"
+        is_blocked = cache.get(cache_key)
+        
+        if is_blocked is None:
+            # Check database
+            is_blocked = BlockedIP.objects.filter(
+                ip_address=ip_address,
+                is_active=True
+            ).exists()
+            
+            # Cache result for 5 minutes
+            cache.set(cache_key, is_blocked, 300)
+        
+        return is_blocked
     
     def get_client_ip(self, request):
         """
