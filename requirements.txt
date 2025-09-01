@@ -1,0 +1,5 @@
+Django>=5.2.5
+celery>=5.5.3
+redis>=6.4.0
+requests>=2.32.4
+django-ratelimit>=4.1.0
