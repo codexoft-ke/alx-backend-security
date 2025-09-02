@@ -129,8 +129,8 @@ RATELIMIT_USE_CACHE = 'default'
 RATELIMIT_ENABLE = True
 
 # Celery configuration
-CELERY_BROKER_URL = 'redis://localhost:6379/0'
-CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_BROKER_URL = 'redis://default:wzBmvpySKe81affRnILnY0DWitpbVrRu@redis-12795.c57.us-east-1-4.ec2.redns.redis-cloud.com:12795/0'
+CELERY_RESULT_BACKEND = 'redis://default:wzBmvpySKe81affRnILnY0DWitpbVrRu@redis-12795.c57.us-east-1-4.ec2.redns.redis-cloud.com:12795/0'
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
@@ -139,11 +139,11 @@ CELERY_TIMEZONE = TIME_ZONE
 # Cache configuration for rate limiting and IP blocking
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'LOCATION': 'unique-snowflake',
+        'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+        'LOCATION': 'redis://default:wzBmvpySKe81affRnILnY0DWitpbVrRu@redis-12795.c57.us-east-1-4.ec2.redns.redis-cloud.com:12795/1',
         'TIMEOUT': 300,  # 5 minutes default
         'OPTIONS': {
-            'MAX_ENTRIES': 1000,
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
         }
     }
 }
