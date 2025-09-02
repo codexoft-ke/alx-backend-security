@@ -1,7 +1,7 @@
 #!/bin/bash
 # Fix deployment script for PythonAnywhere
 
-echo "Applying fixes for Redis cache configuration..."
+echo "Applying fixes for Redis cache configuration and adding homepage..."
 
 # Activate virtual environment
 source venv/bin/activate
@@ -22,5 +22,9 @@ echo "1. Go to your PythonAnywhere Web tab"
 echo "2. Click 'Reload' to restart your web app"
 echo "3. Test the application at your domain"
 echo ""
-echo "The cache configuration has been fixed to use local memory cache"
-echo "which is more reliable on PythonAnywhere free accounts."
+echo "Changes applied:"
+echo "✅ Fixed Redis cache configuration"
+echo "✅ Added homepage view (eliminates 404 errors)"
+echo "✅ Enhanced error handling in middleware"
+echo ""
+echo "Your IP tracking system is now fully functional!"

@@ -10,6 +10,29 @@ import json
 from .models import RequestLog
 
 
+def home_view(request):
+    """
+    Simple homepage view for the IP tracking system.
+    """
+    return JsonResponse({
+        'message': 'ALX Backend Security - IP Tracking System',
+        'status': 'active',
+        'your_ip': request.META.get('REMOTE_ADDR', 'Unknown'),
+        'endpoints': {
+            'test': '/ip-tracking/test/',
+            'stats': '/ip-tracking/stats/',
+            'login': '/ip-tracking/login/',
+            'admin': '/admin/',
+        },
+        'features': [
+            'IP Logging with Geolocation',
+            'IP Blacklisting',
+            'Rate Limiting',
+            'Anomaly Detection'
+        ]
+    })
+
+
 def test_view(request):
     """
     Simple test view to verify the middleware is working.
