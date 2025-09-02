@@ -139,14 +139,32 @@ CELERY_TIMEZONE = TIME_ZONE
 # Cache configuration for rate limiting and IP blocking
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.redis.RedisCache',
-        'LOCATION': 'redis://default:wzBmvpySKe81affRnILnY0DWitpbVrRu@redis-12795.c57.us-east-1-4.ec2.redns.redis-cloud.com:12795/1',
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
         'TIMEOUT': 300,  # 5 minutes default
         'OPTIONS': {
-            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+            'MAX_ENTRIES': 1000,
         }
     }
 }
+
+# Alternative Redis configuration (if you want to use Redis cache)
+# Uncomment below and comment above if you have django-redis installed
+# CACHES = {
+#     'default': {
+#         'BACKEND': 'django_redis.cache.RedisCache',
+#         'LOCATION': 'redis://default:wzBmvpySKe81affRnILnY0DWitpbVrRu@redis-12795.c57.us-east-1-4.ec2.redns.redis-cloud.com:12795/1',
+#         'OPTIONS': {
+#             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+#             'CONNECTION_POOL_KWARGS': {
+#                 'retry_on_timeout': True,
+#                 'socket_timeout': 5,
+#                 'socket_connect_timeout': 5,
+#             }
+#         },
+#         'TIMEOUT': 300,
+#     }
+# }
 
 # Logging configuration
 LOGGING = {

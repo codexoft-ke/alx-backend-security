@@ -49,6 +49,37 @@ X_FRAME_OPTIONS = 'DENY'
 # Your Redis Cloud configuration (already configured)
 # CELERY_BROKER_URL and CACHES are already set correctly
 
+# Override cache configuration for production
+# Use a fallback cache configuration that's more reliable
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake-prod',
+        'TIMEOUT': 300,  # 5 minutes default
+        'OPTIONS': {
+            'MAX_ENTRIES': 1000,
+        }
+    }
+}
+
+# If you want to use Redis cache (optional, comment out above and uncomment below)
+# Make sure django-redis is installed: pip install django-redis
+# CACHES = {
+#     'default': {
+#         'BACKEND': 'django_redis.cache.RedisCache',
+#         'LOCATION': 'redis://default:wzBmvpySKe81affRnILnY0DWitpbVrRu@redis-12795.c57.us-east-1-4.ec2.redns.redis-cloud.com:12795/1',
+#         'OPTIONS': {
+#             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+#             'CONNECTION_POOL_KWARGS': {
+#                 'retry_on_timeout': True,
+#                 'socket_timeout': 5,
+#                 'socket_connect_timeout': 5,
+#             }
+#         },
+#         'TIMEOUT': 300,
+#     }
+# }
+
 # Logging for production
 LOGGING = {
     'version': 1,

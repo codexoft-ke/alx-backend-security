@@ -82,6 +82,7 @@ class IPTrackingMiddleware:
         Check if an IP address is blocked.
         
         Uses caching to avoid database hits on every request.
+        Includes error handling for cache failures.
         
         Args:
             ip_address: The IP address to check
@@ -90,17 +91,33 @@ class IPTrackingMiddleware:
             bool: True if the IP is blocked, False otherwise
         """
         cache_key = f"blocked_ip_{ip_address}"
-        is_blocked = cache.get(cache_key)
+        is_blocked = None
+        
+        # Try to get from cache with error handling
+        try:
+            is_blocked = cache.get(cache_key)
+        except Exception as e:
+            logger.warning(f"Cache error when checking IP {ip_address}: {e}")
+            is_blocked = None
         
         if is_blocked is None:
-            # Check database
-            is_blocked = BlockedIP.objects.filter(
-                ip_address=ip_address,
-                is_active=True
-            ).exists()
-            
-            # Cache result for 5 minutes
-            cache.set(cache_key, is_blocked, 300)
+            try:
+                # Check database
+                is_blocked = BlockedIP.objects.filter(
+                    ip_address=ip_address,
+                    is_active=True
+                ).exists()
+                
+                # Try to cache result for 5 minutes
+                try:
+                    cache.set(cache_key, is_blocked, 300)
+                except Exception as e:
+                    logger.warning(f"Cache error when setting IP {ip_address}: {e}")
+                    
+            except Exception as e:
+                logger.error(f"Database error when checking blocked IP {ip_address}: {e}")
+                # Default to not blocked if database fails
+                is_blocked = False
         
         return is_blocked
     
